@@ -1,25 +1,26 @@
-pipeline{
-    agent{
-        label 'agent'
-    }
-    stages{
-        stage('build'){
-            steps{
-            sh "docker build -t maro4299311/flask:${env.BUILD_NUMBER} ."
-            withCredentials([usernamePassword(credentialsId: 'docker_hub', passwordVariable: 'pass', usernameVariable: 'user')]) {
-             sh "docker login -u $user  -p $pass"
-             sh "docker push maro4299311/flask:${env.BUILD_NUMBER}"
-                //dasdasdsads
-}
-            }
-       
-           
-        }
+pipeline {
+    agent any
 
-        stage('deploy'){
-            steps{
-                sh "docker run -d -p 500${env.BUILD_NUMBER}:8080 maro4299311/flask:${env.BUILD_NUMBER}"
+    stages {
+        stage('build') {
+            steps {
+                // Get some code from a GitHub repository
+                git branch: 'main', credentialsId: 'Github', credentialsId: 'Github', url: 'https://github.com/AhmedAboraya99/flask_dockerapp.git'
+
+                sh "docker build -t ahmedaboraya99/flask_dockerapp:$env.BUILD_NUMBER ."
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'password', usernameVariable: 'dockeruser')]) {
+                sh "docker login -u $dockeruser -p $password"
+                sh "docker push ahmedaboraya99/flask_dockerapp:$env.BUILD_NUMBER"
+                }
+
             }
-        }
+            
+            }
+            stage('deploy') {
+            steps {
+                sh "docker run -d -p 5000:8080 ahmedaboraya99/flask_dockerapp:$env.BUILD_NUMBER"
+        
+            }
+            }
     }
 }
